@@ -53,34 +53,64 @@ Esta secuencia describe el flujo de interacción entre un usuario, una aplicaci�
 Este flujo cubre los pasos desde la apertura de la aplicación hasta la validación y almacenamiento de los datos identificativos del usuario en el dispositivo, asegurándose de que estos sean correctos antes de dar acceso a las funcionalidades principales de la aplicación.
 
 ```mermaid
-
+---
+title: Diagrama de secuencia para la primera vez que se accede al teléfono
+---
 sequenceDiagram
-    participant Usuario
-    participant Aplicación móvil
-    participant Teléfono
+    actor Usuario
+    box rgb(255,240,240) Teléfono del usuario
+        participant Aplicación móvil
+        participant SO as Sistema operativo del teléfono (Android/iOS)
+    end
     participant Servidor
 
-    Usuario->>Aplicación móvil: Abrir aplicación
-    Aplicación móvil->>Teléfono: Solicitar datos almacenados
-    Teléfono--xAplicación móvil: No hay datos
+    Usuario->>+Aplicación móvil: Abrir aplicación
+    Aplicación móvil->>+SO: Solicitar datos almacenados
+    SO--x-Aplicación móvil: No hay datos
     loop Datos incorrectos o no hay datos
-        Aplicación móvil->>Usuario: Solicitar datos identificativos
-        Usuario-->>Aplicación móvil: Envío de datos identificativos
-        Aplicación móvil->>Servidor: Validar datos identificativos
+        Aplicación móvil->>-Usuario: Solicitar datos identificativos
+        note left of Usuario: Introduce sus credenciales
+        Usuario->>+Aplicación móvil: Envío de datos identificativos
+
+    note left of Servidor: Validación de las credenciales
+    rect rgb(255,255,230)
+        Aplicación móvil->>+Servidor: Validar datos identificativos
         alt Datos Correctos
             Servidor--XAplicación móvil: Datos identificativos correctos
         else Datos Incorrectos
-            Servidor--XAplicación móvil: Datos identificativos incorrectos
+            Servidor--X-Aplicación móvil: Datos identificativos incorrectos
         end
     end
-    Aplicación móvil->>Teléfono: Guardar datos correctos
-    Teléfono--xAplicación móvil: Datos guardados
-    Aplicación móvil->>Usuario: Datos correctos
-    Usuario->>Aplicación móvil: OK
-    Aplicación móvil-->>Usuario: Mostrar menú principal
-    
+
+
+    end
+    Aplicación móvil->>+SO: Guardar datos correctos
+    SO--x-Aplicación móvil: Datos guardados
+    par Solicitar envío de email de bienvenida
+        loop Mientras no haya confirmación de envío de email por el servidor
+            critical Solicitar envío de email al servidor 
+                Aplicación móvil->>+Servidor: Solicitar el envío del email de bienvenida
+                Servidor->>Aplicación móvil: OK, enviado
+                Servidor-)-Usuario: Email de bienvenida
+            option Timeout
+                Aplicación móvil->>Aplicación móvil: Reintentar
+            end
+        end
+    and Dejamos al usuario usar la aplicación
+        Aplicación móvil-->>-Usuario: Datos correctos
+        note left of Usuario: Se da por enterado<br/>de que puede empezar a<br/> usar la aplicación
+        Usuario->>+Aplicación móvil: OK
+        Aplicación móvil-->>-Usuario: Mostrar menú principal
+    end
 
 ```
++ En UML, un `loop`es como un BUCLE(while/for)
++ En UML, un `alt`es como un IF / ELSEIF / ELSE
++ En UML, un `opt`es como un IF
++ En UML, un `break`es como un RETURN (Rompe el flujo)
++ En UML, un `critical` es como un TRY/CATCH
+        para control de ERRORES. Es como un `alt`pero con tratamientos especiales si hay error.
++ En UML, un `par` es bloque que se ejecuta en paralelo con otro. Es como si dentro de un programa abro 2 HILOS DE EJECUCIÓN PARALELOS
 
 ## Ejemplo 2: Tipos de comunicaciones/interacciones en UML
 
