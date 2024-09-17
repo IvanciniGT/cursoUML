@@ -14,19 +14,40 @@ sequenceDiagram
     participant             S as Servidor
 
     U->>C:                  💳 Insertar tarjeta
-    C->>C:                  Validar Tarjeta
-           %% TODO: TARJETA NO SE PUEDE LEER
+
+    rect rgb(255,235,210)
+        note left of C:         LECTURA DE LA TARJETA
+        critical                Leer tarjeta
+            alt                 Tarjeta correcta
+            else                Tarjeta caducada
+                C-->>U:         Tarjeta caducada
+            end
+        option                  Error al leer la tarjeta
+                C-->>U:         Tarjeta no legible
+        end
+        opt                     Si la tarjeta no es correcta
+            break               No se puede proceder
+                C-->>U:         💳 Entrega la tarjeta
+            end
+        end
+    end
+
+
+
+
     C-->>U:                 Solicitar PIN
            %% TODO: NO ESCRIBE EL PIN
+
+    %% BUCLE para controlar el numero de veces que le permitimos equivocarse en el pin
 
     rect rgb(255,255,230)
         note left of S:         VALIDACION DEL PIN
         U->>C:                  Escribe su PIN
         C->>+S:                 Solicitar validación del PIN de la tarjeta
         critical                Validar PIN
-            alt PIN correcto
+            alt                 PIN correcto
                 S-->>C:         PIN correcto
-            else PIN incorrecto
+            else                PIN incorrecto
                 S-->>C:         PIN incorrecto
             end
         option                  Servidor con problemas internos
