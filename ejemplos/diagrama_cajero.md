@@ -19,26 +19,28 @@ sequenceDiagram
     C-->>U:                 Solicitar PIN
            %% TODO: NO ESCRIBE EL PIN
 
-    U->>C:                  Escribe su PIN
-    C->>+S:                 Solicitar validación del PIN de la tarjeta
-    critical                Validar PIN
-        alt PIN correcto
-            S-->>C:         PIN correcto
-        else PIN incorrecto
-            S-->>C:         PIN incorrecto
+    rect rgb(255,255,230)
+        note left of S:         VALIDACION DEL PIN
+        U->>C:                  Escribe su PIN
+        C->>+S:                 Solicitar validación del PIN de la tarjeta
+        critical                Validar PIN
+            alt PIN correcto
+                S-->>C:         PIN correcto
+            else PIN incorrecto
+                S-->>C:         PIN incorrecto
+            end
+        option                  Servidor con problemas internos
+            S-->>-C:             Notifica problemas internos
+        option                  Timeout
         end
-    option                  Timeout
-    option                  Servidor con problemas internos
-        S-->>C:             Notifica problemas internos
-    end
 
-    opt                     Si ha habido timeout o problemas internos
-        break               No se puede validar el PIN
-            C-->>U:         💳 Entrega la tarjeta
-            C-->>U:         No se puede procesar la operación
+        opt                     Si ha habido timeout o problemas internos
+            break               No se puede validar el PIN
+                C-->>U:         💳 Entrega la tarjeta
+                C-->>U:         No se puede procesar la operación
+            end
         end
-    end
-           %% TODO: SERVIDOR NO DISPONIBLE
+    end 
 
     C-->>U:                 Cuánto dinero?
     U->>C:                  Introduce la cantidad
