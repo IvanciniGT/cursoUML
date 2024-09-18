@@ -139,3 +139,19 @@ Los lenguajes se clasifican en:
 UML es un lenguaje FORMAL... y si me adhiero a esa FORMALIDAD (ESTA GUAY!, tan guay como usar el Español como Quevedo) se complica la cosa.
 
 Ahora... me puedo relajar un poquito!
+
+# MERMAID
+
+Es una herramienta que nos ofrece un lenguaje escrito para crear gráficos... DE MUCHOS TIPOS (más allá de UML)
+Prácticamente el 80% de UML lo puedo hacer con MERMAID
+Y muchas más cosas...
+Y el lenguaje es sencillito.. Teniendo un ejemplo... lo monto fácil.
+
+NO ES LA UNICA ALTERNATIVA PARA ESTO
+
+# PLANTUML
+
+Es otra herramienta, también integrable en estos documento markdown que estamos escribiendo... y que podemos usar dentro de este visual Studio Code (aunque con un poquitín más de configuración).
+
+Soporta el 100% de UML... pero poco más.
+ESO SI... la sintaxis es DURA !
