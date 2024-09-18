@@ -222,3 +222,15 @@ graph TD;
     B-->D;
     C-->D;
 ```
+
+# Gráficos dinámicos: DE COMPORTAMIENTO
+
+## Diagrama de secuencia
+
+Nos viene bien cuando queremos entender, contar las distintas interacciones entre los distintos componentes/actores de un sistema.
+
+## Diagramas de actividad
+
+Habéis visto por ahí los típicos diagramas de flujo (algoritmos)
+
+Aquí no me centro en los componentes, ni en sus interacciones, sino en el flujo de control / en el proceso.
