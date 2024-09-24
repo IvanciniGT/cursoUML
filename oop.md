@@ -153,12 +153,12 @@ Nos ayuda a modelar un sistema de forma gráfica, usando un paradigma orientado 
 
 ```mermaid
 classDiagram
+namespace gestion-diccionarios {
     class Diccionario {
         + buscarSignificados(Palabra): Lista~Significado~
         + tienesLaPalabra(Palabra): Booleano
         + deQueIdiomaEres(): Idioma
     }
-    <<interface>> Diccionario 
      
 
     class DiccionarioDesdeBBDD {
@@ -173,23 +173,26 @@ classDiagram
         + dameDiccionario(Idioma): Diccionario
         + tienesDiccionario(Idioma): Booleano
     }
-    <<interface>> SuministradorDeDiccionarios
 
     class SuministradorDeDiccionariosDesdeBBDD {
         - diccionarios: Map~Idioma Diccionario~
         + dameDiccionario(Idioma): Diccionario
         + tienesDiccionario(Idioma): Booleano
     }
-
-    class InterfazGrafica {
+}
+    <<interface>> SuministradorDeDiccionarios
+    <<interface>> Diccionario 
+namespace interfaz-grafica {
+    class InterfazGraficaDeConsola {
         + arranca(): Nada
         + acaba(): Nada
     }
+}
 
     Diccionario "0..*" --* "1" SuministradorDeDiccionarios: gestiona
-    InterfazGrafica ..> SuministradorDeDiccionarios: solicita
+    InterfazGraficaDeConsola ..> SuministradorDeDiccionarios: solicita
     SuministradorDeDiccionariosDesdeBBDD --|> SuministradorDeDiccionarios: implementa
-    InterfazGrafica ..> Diccionario: usa
+    InterfazGraficaDeConsola ..> Diccionario: usa
 
     DiccionarioDesdeBBDD --|> Diccionario: implementa
 ```
