@@ -325,3 +325,248 @@ Ver los distintos tipos de relaciones entre clases:
 Además UML marca el concepto de Namespace, que es un espacio de nombres:
 Es una forma de agrupar conceptualmente clases/interfaces que tienen algo en común:
 que responden a una responsabilidad única de más alto nivel
+
+---
+
+# Queremos montar un proceso Batch de carga de datos
+
+Lo planteamos con Programación Orientada a Objetos.
+Vamos a intentar aplicar esos concepto PRINCIOS SOLID.
+
+Quiero un programa que al arrancar mande un email a una persona: QUE EMPEZAMOS!!!
+Abra un fichero y vaya leyendo datos: LINEAS.
+Cada linea contiene información de una Persona:
+- Nombre
+- Apellidos
+- FechaNacimiento
+- DNI
+- Email
+- Teléfono
+A la que va leyendo los datos (de 1 en 1)
+- Filtra los que tengan más de 18 años (Se queda con ellos)
+- Valida que el email sea correcto
+- Valida que el DNI sea correcto
+- Queremos que en BBDD también se guarde la EDAD
+Cuando todo está ok:
+- Lo guardamos en una BBDD.. los guardamos de 20 en 20.
+Al acabar, que mande otro email a la misma persona: QUE HEMOS ACABADO!!!
+
+CUIDADO!
+No os he pedido que montéis ese programa!
+Lo que queremos es modelar los componentes de ese sistema:
+- Qué módulos quiero tener?
+- Qué componentes quiero tener en cada módulo (clases/interfaces)?
+
+
+1º Identificar MODULOS -> namespaces.
+A muy alto nivel,que tipo de tareas quiero hacer que sean muy diferentes entre si!
+RESPONSABILIDADES ÚNICAS       NOMBRE DEL MODULO
+- Guardar en BBDD                   bbdd
+- Enviar correo                     emails
+- Acceder al fichero de datos       lector-ficheros
+- Procesar datos                    procesador-datos   
+  - Validar datos                       validador
+  - Calcular datos                      calculador-edad     
+- Orquestar el trabajo              APLICACION / PROCESO BATCH
+
+      entrada-bbdd   |  procesador>18 |    escrito-ficheros |
+  LectorPersonasBBDD |    Distintos   |      Fichero        |     Clases
+            |        |      |         |        ^            |
+       implementa    |   implementa   |    implementa       |     
+            |        |      |         |        |            |
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
+            v               v                  |                                    |
+    LectorPersonas   ProcesadorPersoans    AlmacenadorPersonas        Interfaces    |
+        damePersona()     procesaPersona()   guardaPersona()                        |
+            ^               ^                 ^                                     | En cualquier módulo de procesamiento BATCH necesito esto
+            +---------------+-----------------+               Persona(Entidad)      |
+                            |                                                       |       Entidad es una clase que solo define DATOS(no hay logica-NO METODOS)
+                         necesita                                                   |       
+                            |                                                       |       
+                      PROCESO BATCH                             Clase               |
+                            |                                                       |
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
+       |                    v
+       |         SERVICIO DE NOTIFICACIONES                      Interfaz (no hay código) DECLARACION DE INTENCIONES                        notificaciones
+       |                    ^                                       ¿Cómo? NPI: Depende de lo que quiero concretamente
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
+       |                    |
+       |         SERVICIO DE ENVIO DE EMAILS                     Clase                                                                  notificaciones-tipo-email
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -             
+
+    ^^^ MUCHO CUIDADO CON ESE GRAFICO!!!!!      NO ES  NI POR ASOMO, NI EN LO MAS REMOTO UN GRAFICO DE FLUJO !!!!
+
+    Los diagrams de clases son ESTATICOS (por definición NO REPRESNTAN FLUJOS)
+    Representan RELACIONES (dependencias, composiciones, agregaciones, vinculaciones) entre clases/interfaces
+
+
+LectorPersonas                              ProcesadorPersonas                                              AlmacenadorPersonas
+    damePersona()::PersonaLeida              procesaPersona(PersonaLeida):PersonaProcesada                      guardaPersona(PersonaProcesada):Nada
+
+
+            PersonaLeida            Son muy similares... pero no son iguales            AQUI NO TENGO EDAD
+                   ^
+                extiende
+                   |
+            PersonaProcesada                                    AQUI TENGO EDAD
+
+
+Proceso BATCH tipo SCRIPT de arriba a abajo COBOL
+
+>proceso.PROGRAMA
+
+    1- Envio email
+    2- Abro fichero
+    Abro BBDD
+    3- Leo linea linea      FOR
+    4-    Proceso datos
+            4.1- Calculo (EDAD)             IF
+            4.2- Filtro  según argumento de entrada(EDAD_A_FILTRAR)
+                if(EDAD_A_FILTAR == "MAYORES_18")
+                    filtroEdad1
+                else
+                    filtroEdad2
+            4.3- Validación
+    5-    Guardo en BBDD
+    6- Cierra fichero
+    Cierro BBDD
+    7- Envio email
+
+    filtroEdad1
+
+    filtroEdad2
+
+---
+2º Identificar COMPONENTES -> clases/interfaces
+---
+3º Definir las propiedades y métodos de cada componente
+
+
+---
+Las clases implementan INTERFACES
+    LectorPersonasFichero que también sería una clase, implementa la interfaz LectorPersonas (UNA DISTINTA)
+    LectorPersonasBBDD es una implementación de LectorPersonas (Le aporta código concreto a la interfaz. La interfaz NO TIENE CODIGO)
+            ^                                        Necesita una función leerPersona(): PersonaLeida
+            Yo en cambio OFREZO UNA IMPLEMEMTACION (CODIGO) 
+                para esa función leerPersona()
+
+Las clases pueden extender otras clases. Al hacerlo HEREDA TODO SU COMPORTAMIENTO: ATRIBUTOS + FUNCIONES + CODIGO DE ESAS FUNCIONES
+
+    PersonaLeida     <......        PersonaProcesada
+    nombre                          (lo mismito que una PersonaLeida)
+    apellidos                       edad
+    fechaNacimiento
+    dni
+    email
+    telefono
+
+
+Lo importante en programación orientada a Objetos es que:
+
+    Una clase NO DEBE TENER RELACION (dependencia) con OTRA CLASE (a no ser que hablemos de una entidad o de 2 clases que estén MUY MUY MUY INTIMAMENTE LIGADAS: extensión - MUY RATO: 10%)
+
+    Ambas clases, si deben estar relacionadas de alguna forma, SIEMPRE ES MEDIANTE UNA INTERFAZ (PRINCIPIO DE INVERSIÓN DE DEPENDENCIAS)
+
+
+```mermaid
+classDiagram 
+    namespace proceso-batch {
+        class ProcesoBatch {
+            + arranca(): Nada
+        }
+        class LectorPersonas {
+            <<interface>>
+            + leerPersona(): PersonaLeida
+        }
+        class EscritorPersonas {
+            <<interface>>
+            + escribirPersona(PersonaProcesada): Nada
+        }
+        class ProcesadorPersonas {
+            <<interface>>
+            + procesaPersona(PersonaLeida): PersonaProcesada
+        }
+        class PersonaLeida {
+            <<entity>>
+            + nombre: Texto
+            + apellidos: Texto
+            + fechaNacimiento: Fecha
+            + dni: Texto
+            + email: Texto
+            + telefono: Texto
+        }
+        class PersonaProcesada {
+            <<entity>>
+            + edad: Entero
+        }
+    }
+    PersonaProcesada --|> PersonaLeida: rel. herencia <BR/> (extiende)
+    ProcesoBatch ..> LectorPersonas: rel. dependencia <BR/> (necesita)
+    ProcesoBatch ..> ProcesadorPersonas: rel. dependencia <BR/> (necesita)
+    ProcesoBatch ..> EscritorPersonas: rel. dependencia <BR/> (necesita)
+
+    LectorPersonas --> PersonaLeida: provee
+    ProcesadorPersonas --> PersonaLeida: requiere
+    ProcesadorPersonas --> PersonaProcesada: provee
+    EscritorPersonas --> PersonaProcesada: requiere
+
+    namespace modulo-notificaciones {
+        class ServicioNotificaciones {
+            <<interface>>
+            + enviarNotificacion(Notificacion): Nada
+        }
+    }
+    ProcesoBatch ..> ServicioNotificaciones:  rel. dependencia <BR/> (necesita)
+
+
+    namespace modulo-emails {
+        class ServicioEmails {
+            <<service>>
+            + enviarNotificacion(Notificacion): Nada
+        }
+    }
+
+    ServicioEmails ..|> ServicioNotificaciones: implementa
+
+
+    namespace modulo-whatsapp {
+        class ServicioWhatsapp {
+            <<service>>
+            + enviarNotificacion(Notificacion): Nada
+        }
+    }
+
+    ServicioWhatsapp ..|> ServicioNotificaciones: implementa
+
+    namespace lector-fichero {
+        class LectorPersonasFichero {
+            + leerPersona(): PersonaLeida
+        }
+    }
+    LectorPersonasFichero ..|> LectorPersonas: implementa
+
+    namespace escritor-bbdd {
+        class EscritorPersonasBBDD {
+            + escribirPersona(PersonaProcesada): Nada
+        }
+    }
+    
+    EscritorPersonasBBDD ..|> EscritorPersonas: implementa
+
+    namespace procesador-mayor-18{
+        class ProcesadorPersonasMayores18 {
+            + procesarPersona(PersonaLeida): PersonaProcesada
+        }
+
+    }
+
+    ProcesadorPersonasMayores18 ..|> ProcesadorPersonas: implementa
+```
+
+CON CUADRADOS EN UML REPRESENTAMOS:
+- clase (tienen propiedades y/o funciones CON CODIGO)
+- interfaces (no tienen propiedades ni funciones CON CODIGO, SOLO funciones SIN CODIGO)
+     Solo declaran funciones
+- entidad clases que solo tiene propiedades, NO TIENE FUNCIONES (SOLO GUARDAN DATOS)
+- servicio: SON CLASES de las que solo necesitamos una instancia en todo el sistema
+            Al usar el sistema, solo me hace falta una copia de ese tipo de datos. 
